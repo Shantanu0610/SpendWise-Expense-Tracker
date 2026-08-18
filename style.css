@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+button,
+a {
+    transition: all 0.2s ease;
+}
+
+
+button:hover {
+    cursor: pointer;
+}
