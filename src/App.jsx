@@ -1,76 +1,25 @@
-import { useMemo } from "react";
-
+// ```jsx
 import Header from "./components/Header";
 import SummaryCards from "./components/SummaryCards";
 import TransactionForm from "./components/TransactionForm";
 import TransactionList from "./components/TransactionList";
 
-import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useFetch } from "./hooks/useFetch";
 
-export default function App() {
+import {
+  TransactionProvider,
+  useTransactions
+} from "./context/TransactionContext";
 
-  const [transactions, setTransactions] =
-    useLocalStorage("spendwise-transactions", []);
+function Dashboard() {
+  const { totals } = useTransactions();
 
-  // Data Fetching using custom hook
   const {
     data: users,
-    loading,
+    loading
   } = useFetch(
     "https://jsonplaceholder.typicode.com/users"
   );
-
-  // useMemo for calculations
-  const totals = useMemo(() => {
-
-    const income = transactions
-      .filter(
-        (transaction) =>
-          transaction.type === "income"
-      )
-      .reduce(
-        (total, transaction) =>
-          total + transaction.amount,
-        0
-      );
-
-    const expense = transactions
-      .filter(
-        (transaction) =>
-          transaction.type === "expense"
-      )
-      .reduce(
-        (total, transaction) =>
-          total + transaction.amount,
-        0
-      );
-
-    return {
-      income,
-      expense,
-      balance: income - expense,
-    };
-
-  }, [transactions]);
-
-  const addTransaction = (transaction) => {
-    setTransactions([
-      ...transactions,
-      transaction,
-    ]);
-  };
-
-  const deleteTransaction = (id) => {
-
-    const updatedTransactions =
-      transactions.filter(
-        (transaction) =>
-          transaction.id !== id
-      );
-
-    setTransactions(updatedTransactions);
-  };
 
   return (
     <div className="app">
@@ -90,7 +39,6 @@ export default function App() {
           </div>
 
           <div className="api-status">
-
             {loading
               ? "Loading API data..."
               : `${users.length} users loaded from API`}
@@ -106,14 +54,9 @@ export default function App() {
 
         <div className="dashboard-grid">
 
-          <TransactionForm
-            addTransaction={addTransaction}
-          />
+          <TransactionForm />
 
-          <TransactionList
-            transactions={transactions}
-            deleteTransaction={deleteTransaction}
-          />
+          <TransactionList />
 
         </div>
 
@@ -122,3 +65,12 @@ export default function App() {
     </div>
   );
 }
+
+export default function App() {
+  return (
+    <TransactionProvider>
+      <Dashboard />
+    </TransactionProvider>
+  );
+}
+

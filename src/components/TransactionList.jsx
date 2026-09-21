@@ -1,15 +1,24 @@
-export default function TransactionList({
-  transactions,
-  deleteTransaction,
-}) {
+// ```jsx
+import { useTransactions } from "../context/TransactionContext";
+
+export default function TransactionList() {
+
+  const {
+    transactions,
+    deleteTransaction
+  } = useTransactions();
 
   if (transactions.length === 0) {
+
     return (
       <div className="transactions-card">
+
         <h2>Recent Transactions</h2>
+
         <p className="empty-message">
           No transactions added yet.
         </p>
+
       </div>
     );
   }
@@ -44,11 +53,17 @@ export default function TransactionList({
                 </div>
 
                 <div>
-                  <h3>{transaction.title}</h3>
+
+                  <h3>
+                    {transaction.title}
+                  </h3>
 
                   <p>
-                    {transaction.category} • {transaction.date}
+                    {transaction.category}
+                    {" • "}
+                    {transaction.date}
                   </p>
+
                 </div>
 
               </div>
@@ -71,7 +86,9 @@ export default function TransactionList({
                 <button
                   className="delete-btn"
                   onClick={() =>
-                    deleteTransaction(transaction.id)
+                    deleteTransaction(
+                      transaction.id
+                    )
                   }
                 >
                   Delete
@@ -88,3 +105,4 @@ export default function TransactionList({
     </div>
   );
 }
+
