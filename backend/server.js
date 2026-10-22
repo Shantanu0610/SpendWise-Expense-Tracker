@@ -1,116 +1,54 @@
 
-require("dotenv").config();
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+import authRoutes from "./routes/authRoutes.js";
 
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-
-const userRoutes = require("./routes/userRoutes");
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.disable("x-powered-by");
+if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+  console.error("MONGO_URI and JWT_SECRET must be set in .env");
+  process.exit(1);
+}
 
-app.use(helmet());
-
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173"
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+  })
+);
 
 app.use(express.json({ limit: "10kb" }));
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-  message: {
-    message: "Too many requests. Please try again later."
-  }
-});
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-  message: {
-    message: "Too many authentication attempts. Try again later."
-  }
-});
-
 app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "SpendWise Secure REST API is running."
+  res.json({
+    message: "SpendWise authentication API is running.",
   });
 });
 
-app.use("/api", apiLimiter);
-
-app.use("/api/users", (req, res, next) => {
-  if (req.path === "/login" || req.path === "/register") {
-    return authLimiter(req, res, next);
-  }
-  next();
-});
-
-app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
-    message: "API endpoint not found."
+    message: "API route not found.",
   });
 });
-
-// Centralized error handling
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-
-  console.error("Request error:", err.message);
-
-  if (err.type === "entity.parse.failed") {
-    return res.status(400).json({
-      message: "Invalid JSON request body."
-    });
-  }
-
-  if (err.name === "ValidationError") {
-    return res.status(400).json({
-      message: "Invalid data."
-    });
-  }
-
-  if (err.name === "CastError") {
-    return res.status(400).json({
-      message: "Invalid identifier."
-    });
-  }
-
-  return res.status(500).json({
-    message: "Internal server error."
-  });
-});
-
-const PORT = process.env.PORT || 5000;
 
 async function startServer() {
-  if (!process.env.MONGODB_URI || !process.env.JWT_SECRET) {
-    throw new Error("MONGODB_URI and JWT_SECRET must be configured.");
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected successfully.");
+
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
   }
-
-  await mongoose.connect(process.env.MONGODB_URI);
-  console.log("MongoDB connected successfully.");
-
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
 }
 
-startServer().catch((error) => {
-  console.error("Server startup failed:", error.message);
-  process.exit(1);
-});
+startServer();
