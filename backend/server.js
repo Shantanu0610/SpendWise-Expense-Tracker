@@ -1,6 +1,4 @@
 import dns from "node:dns";
-
-import dns from "node:dns";
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 import express from "express";
@@ -17,20 +15,20 @@ const app = express();
 const httpServer = createServer(app);
 
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL =
-  process.env.CLIENT_URL || "http://localhost:5173";
+const CLIENT_URL = process.env.CLIENT_URL;
+const allowedOrigins = CLIENT_URL ? [CLIENT_URL, "http://localhost:5173"] : "*";
 
 if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
   console.error("MONGO_URI and JWT_SECRET must be set in .env");
   process.exit(1);
 }
 
-app.use(cors({ origin: CLIENT_URL }));
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: "10kb" }));
 
 const io = new Server(httpServer, {
   cors: {
-    origin: CLIENT_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });

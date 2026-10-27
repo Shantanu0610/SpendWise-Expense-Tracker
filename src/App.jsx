@@ -1,4 +1,3 @@
-// ```jsx
 import Header from "./components/Header";
 import SummaryCards from "./components/SummaryCards";
 import TransactionForm from "./components/TransactionForm";
@@ -14,12 +13,12 @@ import {
 function Dashboard() {
   const { totals } = useTransactions();
 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const {
-    data: users,
-    loading
-  } = useFetch(
-    "https://jsonplaceholder.typicode.com/users"
-  );
+    data: backendStatus,
+    loading,
+    error
+  } = useFetch(`${API_URL}/`);
 
   return (
     <div className="app">
@@ -40,8 +39,10 @@ function Dashboard() {
 
           <div className="api-status">
             {loading
-              ? "Loading API data..."
-              : `${users.length} users loaded from API`}
+              ? "Connecting to API..."
+              : error
+              ? "Backend API: Offline (Fallback Mode)"
+              : `Backend API: ${backendStatus?.message || "Connected"}`}
           </div>
 
         </div>
@@ -73,4 +74,3 @@ export default function App() {
     </TransactionProvider>
   );
 }
-
