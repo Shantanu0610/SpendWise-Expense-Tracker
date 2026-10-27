@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "npm --prefix backend install && npm --prefix backend start"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.1.1",
