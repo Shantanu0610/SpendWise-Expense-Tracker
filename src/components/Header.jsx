@@ -2,7 +2,8 @@ export default function Header() {
   return (
     <header className="header">
       <div>
-        <h1>💰 SpendWise</h1>
+        {/* <h1>💰 SpendWise</h1> */}
+        <h1>SpendWise - Live CI/CD Deployment 🚀</h1>
         <p>Smart Expense Management</p>
       </div>
 
